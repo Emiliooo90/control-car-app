@@ -1,0 +1,295 @@
+<div class="create-quote-container">
+  <!-- Header -->
+  <div class="page-header">
+    <button class="back-btn" routerLink="/quotes">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15,18 9,12 15,6"></polyline>
+      </svg>
+      Volver
+    </button>
+    <h1>Crear Presupuesto</h1>
+  </div>
+
+  <!-- Main Content -->
+  <div class="quote-content">
+    <!-- Customer Information -->
+    <div class="section-card">
+      <h2>Información del Cliente</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="customerName">Nombre del Cliente *</label>
+          <input 
+            type="text" 
+            id="customerName" 
+            [(ngModel)]="quote.customerName" 
+            placeholder="Ingrese el nombre del cliente"
+            required
+          >
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="vehicleModel">Modelo del Vehículo *</label>
+          <input 
+            type="text" 
+            id="vehicleModel" 
+            [(ngModel)]="quote.vehicleInfo!.model" 
+            placeholder="Ej: Toyota Corolla"
+            required
+          >
+        </div>
+        <div class="form-group">
+          <label for="vehiclePlate">Patente *</label>
+          <input 
+            type="text" 
+            id="vehiclePlate" 
+            [(ngModel)]="quote.vehicleInfo!.plate" 
+            placeholder="Ej: ABCD12"
+            required
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Quote Items -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>Servicios y Productos</h2>
+        <div class="action-buttons">
+          <button class="add-product-btn" (click)="openProductBrowser()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
+            </svg>
+            Agregar Productos
+          </button>
+          <button class="add-service-btn" (click)="addCustomItem()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Servicio Personalizado
+          </button>
+        </div>
+      </div>
+
+      <!-- Items List -->
+      <div class="items-table" *ngIf="quote.items && quote.items.length > 0; else noItems">
+        <div class="table-header">
+          <div class="col-item">Artículo</div>
+          <div class="col-qty">Cant.</div>
+          <div class="col-price">Precio Unit.</div>
+          <div class="col-discount">Desc. %</div>
+          <div class="col-total">Total</div>
+          <div class="col-actions">Acciones</div>
+        </div>
+
+        <div class="table-row" *ngFor="let item of quote.items; let i = index">
+          <div class="col-item">
+            <div class="item-info">
+              <input 
+                type="text" 
+                [(ngModel)]="item.name" 
+                (blur)="updateItemTotal(item)"
+                class="item-name-input"
+              >
+              <input 
+                type="text" 
+                [(ngModel)]="item.description" 
+                placeholder="Descripción"
+                class="item-desc-input"
+              >
+              <span class="item-sku" *ngIf="item.sku">SKU: {{ item.sku }}</span>
+            </div>
+          </div>
+          
+          <div class="col-qty">
+            <input 
+              type="number" 
+              [(ngModel)]="item.quantity" 
+              (input)="updateItemQuantity(item)"
+              min="1"
+              class="qty-input"
+            >
+          </div>
+          
+          <div class="col-price">
+            <input 
+              type="number" 
+              [(ngModel)]="item.unitPrice" 
+              (input)="updateItemTotal(item)"
+              min="0"
+              class="price-input"
+            >
+          </div>
+          
+          <div class="col-discount">
+            <input 
+              type="number" 
+              [(ngModel)]="item.discount" 
+              (input)="updateItemTotal(item)"
+              min="0"
+              max="100"
+              class="discount-input"
+            >
+          </div>
+          
+          <div class="col-total">
+            <span class="total-amount">{{ formatCurrency(item.total) }}</span>
+          </div>
+          
+          <div class="col-actions">
+            <button class="remove-btn" (click)="removeItem(i)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3,6 5,6 21,6"></polyline>
+                <path d="M19,6 19,20 5,20 5,6M8,6V4a2,2 0,0,1 2,-2h4a2,2 0,0,1 2,2V6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noItems>
+        <div class="no-items">
+          <p>No hay productos o servicios agregados</p>
+          <p class="subtitle">Haz clic en "Agregar Productos" para comenzar</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Quote Summary -->
+    <div class="section-card">
+      <h2>Resumen del Presupuesto</h2>
+      <div class="quote-summary">
+        <div class="summary-row">
+          <span>Subtotal:</span>
+          <span>{{ formatCurrency(quote.subtotal || 0) }}</span>
+        </div>
+        <div class="summary-row">
+          <span>IVA (19%):</span>
+          <span>{{ formatCurrency(quote.tax || 0) }}</span>
+        </div>
+        <div class="summary-row total-row">
+          <span>Total:</span>
+          <span>{{ formatCurrency(quote.total || 0) }}</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="notes">Notas adicionales</label>
+        <textarea 
+          id="notes" 
+          [(ngModel)]="quote.notes" 
+          placeholder="Comentarios, términos y condiciones, etc."
+          rows="4"
+        ></textarea>
+      </div>
+
+      <div class="action-buttons">
+        <button class="cancel-btn" routerLink="/quotes">Cancelar</button>
+        <button class="save-btn" (click)="saveQuote()">Guardar Presupuesto</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Browser Modal -->
+<div class="modal-overlay" *ngIf="showProductBrowser" (click)="closeProductBrowser()">
+  <div class="product-browser-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Buscador de Productos</h3>
+      <button class="close-btn" (click)="closeProductBrowser()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="search-section">
+      <div class="search-input-container">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          (input)="searchProducts()"
+          placeholder="Busque por SKU o Descripción"
+          class="search-input"
+        >
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="M21,21 15.514,15.514"></path>
+        </svg>
+      </div>
+    </div>
+
+    <div class="products-table">
+      <div class="table-header">
+        <div class="col-select"></div>
+        <div class="col-sku">SKU</div>
+        <div class="col-name">Nombre</div>
+        <div class="col-description">Descripción</div>
+        <div class="col-price">Precio de Venta</div>
+        <div class="col-brand">Marcas</div>
+      </div>
+
+      <div class="table-body">
+        <div 
+          class="table-row" 
+          *ngFor="let product of paginatedProducts"
+          [class.selected]="isProductSelected(product)"
+        >
+          <div class="col-select">
+            <input 
+              type="checkbox" 
+              [checked]="isProductSelected(product)"
+              (change)="toggleProductSelection(product)"
+            >
+          </div>
+          <div class="col-sku">{{ product.sku }}</div>
+          <div class="col-name">{{ product.name }}</div>
+          <div class="col-description">{{ product.description }}</div>
+          <div class="col-price">{{ formatCurrency(product.price) }}</div>
+          <div class="col-brand">{{ product.brand }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button 
+        class="page-btn" 
+        (click)="previousPage()" 
+        [disabled]="currentPage === 1"
+      >
+        Anterior
+      </button>
+      <span class="page-info">{{ currentPage }} - {{ totalPages }} de {{ totalPages }}</span>
+      <button 
+        class="page-btn" 
+        (click)="nextPage()" 
+        [disabled]="currentPage === totalPages"
+      >
+        Siguiente
+      </button>
+    </div>
+
+    <div class="modal-footer">
+      <div class="selection-info">
+        <span *ngIf="selectedProducts.length > 0">
+          {{ selectedProducts.length }} producto(s) seleccionado(s)
+        </span>
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeProductBrowser()">Cancelar</button>
+        <button 
+          class="select-btn" 
+          [disabled]="selectedProducts.length === 0"
+          (click)="addSelectedProducts()"
+        >
+          Seleccionar
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 
