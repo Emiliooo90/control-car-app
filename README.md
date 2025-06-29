@@ -17,6 +17,7 @@
 ## 🔍 Parte 2 – Análisis Crítico
 Analiza la siguiente imagen **<ANEXO 1>** y responde estas preguntas:
 
+- ![image](https://github.com/user-attachments/assets/b86f3f45-8eea-40b3-98f7-b940357a4634)
 
 
 - ¿Qué errores visuales, de jerarquía o de experiencia puedes identificar en la imagen?
